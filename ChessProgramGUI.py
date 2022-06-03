@@ -332,6 +332,12 @@ class ChessProgramGUI:
         self.fen_copy_button = FENCopyButtonGUI(self.SQUARE * 0.6, self.SQUARE * 8.7, self.font, copy_fen_to_clipboard)
         self.buttons.append(self.fen_copy_button)
 
+        def exit_button_impl():
+            raise self.QuitException
+
+        exit_button = ExitButton(self.SQUARE * 13, self.SQUARE * 6, self.SQUARE, self.SQUARE, exit_button_impl)
+        self.buttons.append(exit_button)
+
     def handle_mouse_event(self, event):
         if event.type == pygame.MOUSEMOTION:
             if self.is_board_choosed:

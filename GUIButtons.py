@@ -35,7 +35,52 @@ class ButtonGUI(pygame.Rect):
         pass
 
 
-class ImageButtonGUI(ButtonGUI):
+def make_hover_image(unhover_image, scale_factor=1.08):
+    hover_image = pygame.Surface(unhover_image.get_size(), pygame.SRCALPHA).convert_alpha()
+    hover_image.fill((0, 0, 0, 45))
+
+    w, h = hover_image.get_size()
+    shift_factor = (scale_factor - 1) / 2
+
+    scaled = pygame.transform.smoothscale(unhover_image, (w * scale_factor, h * scale_factor))
+    hover_image.blit(scaled, (-w * shift_factor, -h * shift_factor))
+
+    return hover_image
+
+
+class ImageButton(ButtonGUI):
+    """Class that describes button, that have images for unhovered and hovered states"""
+
+    def __init__(self, x, y, width, height, unhover_image, hover_image, command=lambda: None):
+        super().__init__(x, y, width, height, command)
+
+        self.unhover_image = pygame.transform.smoothscale(unhover_image, (width, height))
+        self.hover_image = pygame.transform.smoothscale(hover_image, (width, height))
+
+        self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+    def draw(self, high_surface):
+        self.surface.fill((0, 0, 0, 0))
+
+        image_to_draw = self.hover_image if self.is_hovered else self.unhover_image
+
+        self.surface.blit(image_to_draw, (0, 0))
+        high_surface.blit(self.surface, (self.x, self.y))
+
+
+class ImagePreparedButton(ImageButton):
+    """ImageButton class with prepared images"""
+
+    unhover_image_src = ''
+
+    def __init__(self, x, y, width, height, command=lambda: None):
+        unhover_image = pygame.image.load(self.unhover_image_src).convert_alpha()
+        hover_image = make_hover_image(unhover_image)
+
+        super().__init__(x, y, width, height, unhover_image, hover_image, command)
+
+
+class ImageRadioButton(ButtonGUI):
     """Class that describes button, that have images for unhovered, hovered and activated states"""
 
     def __init__(self, x, y, width, height, unhover_image, hover_image, activated_image, command=lambda: None):
@@ -59,8 +104,8 @@ class ImageButtonGUI(ButtonGUI):
         high_surface.blit(self.surface, (self.x, self.y))
 
 
-class ImagePreparedButton(ImageButtonGUI):
-    """ImageButton class with prepared images"""
+class ImagePreparedRadioButton(ImageRadioButton):
+    """ImageRadioButton class with prepared images"""
 
     unhover_image_src = ''
     hover_image_src = ''
@@ -74,92 +119,84 @@ class ImagePreparedButton(ImageButtonGUI):
         super().__init__(x, y, width, height, unhover_image, hover_image, activated_image, command)
 
 
-class QueenPromotionButton(ImagePreparedButton):
+class QueenPromotionButton(ImagePreparedRadioButton):
     """Button class for queen promotion"""
 
-    unhover_image_src = 'Sprites/QueenPromotionButton/unhover.png'
-    hover_image_src = 'Sprites/QueenPromotionButton/hover.png'
-    activated_image_src = 'Sprites/QueenPromotionButton/activated.png'
+    unhover_image_src = 'Sprites/ButtonSprites/Promotion/QueenPromotion/unhover.png'
+    hover_image_src = 'Sprites/ButtonSprites/Promotion/QueenPromotion/hover.png'
+    activated_image_src = 'Sprites/ButtonSprites/Promotion/QueenPromotion/activated.png'
 
 
-class BishopPromotionButton(ImagePreparedButton):
+class BishopPromotionButton(ImagePreparedRadioButton):
     """Button class for bishop promotion"""
 
-    unhover_image_src = 'Sprites/BishopPromotionButton/unhover.png'
-    hover_image_src = 'Sprites/BishopPromotionButton/hover.png'
-    activated_image_src = 'Sprites/BishopPromotionButton/activated.png'
+    unhover_image_src = 'Sprites/ButtonSprites/Promotion/BishopPromotion/unhover.png'
+    hover_image_src = 'Sprites/ButtonSprites/Promotion/BishopPromotion/hover.png'
+    activated_image_src = 'Sprites/ButtonSprites/Promotion/BishopPromotion/activated.png'
 
 
-class KnightPromotionButton(ImagePreparedButton):
+class KnightPromotionButton(ImagePreparedRadioButton):
     """Button class for knight promotion"""
 
-    unhover_image_src = 'Sprites/KnightPromotionButton/unhover.png'
-    hover_image_src = 'Sprites/KnightPromotionButton/hover.png'
-    activated_image_src = 'Sprites/KnightPromotionButton/activated.png'
+    unhover_image_src = 'Sprites/ButtonSprites/Promotion/KnightPromotion/unhover.png'
+    hover_image_src = 'Sprites/ButtonSprites/Promotion/KnightPromotion/hover.png'
+    activated_image_src = 'Sprites/ButtonSprites/Promotion/KnightPromotion/activated.png'
 
 
-class RookPromotionButton(ImagePreparedButton):
+class RookPromotionButton(ImagePreparedRadioButton):
     """Button class for rook promotion"""
 
-    unhover_image_src = 'Sprites/RookPromotionButton/unhover.png'
-    hover_image_src = 'Sprites/RookPromotionButton/hover.png'
-    activated_image_src = 'Sprites/RookPromotionButton/activated.png'
+    unhover_image_src = 'Sprites/ButtonSprites/Promotion/RookPromotion/unhover.png'
+    hover_image_src = 'Sprites/ButtonSprites/Promotion/RookPromotion/hover.png'
+    activated_image_src = 'Sprites/ButtonSprites/Promotion/RookPromotion/activated.png'
 
 
 class FullBackwardButton(ImagePreparedButton):
     """Button class for rewinding chess history (full backward)"""
 
-    unhover_image_src = 'Sprites/FullBackwardButton/unhover.png'
-    hover_image_src = 'Sprites/FullBackwardButton/hover.png'
-    activated_image_src = 'Sprites/FullBackwardButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/full_backward.png'
 
 
 class FullForwardButton(ImagePreparedButton):
     """Button class for rewinding chess history (full forward)"""
 
-    unhover_image_src = 'Sprites/FullForwardButton/unhover.png'
-    hover_image_src = 'Sprites/FullForwardButton/hover.png'
-    activated_image_src = 'Sprites/FullForwardButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/full_forward.png'
 
 
 class SkipBackwardButton(ImagePreparedButton):
     """Button class for rewinding chess history (one step back)"""
 
-    unhover_image_src = 'Sprites/SkipBackButton/unhover.png'
-    hover_image_src = 'Sprites/SkipBackButton/hover.png'
-    activated_image_src = 'Sprites/SkipBackButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/skip_back.png'
 
 
 class SkipButton(ImagePreparedButton):
     """Button class for rewinding chess history (one step forward)"""
 
-    unhover_image_src = 'Sprites/SkipButton/unhover.png'
-    hover_image_src = 'Sprites/SkipButton/hover.png'
-    activated_image_src = 'Sprites/SkipButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/skip.png'
 
 
 class RestartButton(ImagePreparedButton):
     """Button class for restarting the game"""
 
-    unhover_image_src = 'Sprites/RestartButton/unhover.png'
-    hover_image_src = 'Sprites/RestartButton/hover.png'
-    activated_image_src = 'Sprites/RestartButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/restart.png'
 
 
 class ImportFENButton(ImagePreparedButton):
     """Button class for restarting game with custom position"""
 
-    unhover_image_src = 'Sprites/ImportFENButton/unhover.png'
-    hover_image_src = 'Sprites/ImportFENButton/hover.png'
-    activated_image_src = 'Sprites/ImportFENButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/import_fen.png'
 
 
 class RestartInitialPositionButton(ImagePreparedButton):
     """Button class for restarting the initial position of game"""
 
-    unhover_image_src = 'Sprites/RestartInitialPositionButton/unhover.png'
-    hover_image_src = 'Sprites/RestartInitialPositionButton/hover.png'
-    activated_image_src = 'Sprites/RestartInitialPositionButton/hover.png'
+    unhover_image_src = 'Sprites/ButtonSprites/full_restart.png'
+
+
+class ExitButton(ImagePreparedButton):
+    """Button class for exiting"""
+
+    unhover_image_src = 'Sprites/ButtonSprites/exit.png'
 
 
 class FENCopyButtonGUI(ButtonGUI):
@@ -197,4 +234,5 @@ __all__ = ['QueenPromotionButton',
            'RestartButton',
            'ImportFENButton',
            'RestartInitialPositionButton',
+           'ExitButton',
            'FENCopyButtonGUI']
