@@ -48,7 +48,7 @@ def make_hover_image(unhover_image, scale_factor=1.08):
     return hover_image
 
 
-class ImageButton(ButtonGUI):
+class ImageButtonGUI(ButtonGUI):
     """Class that describes button, that have images for unhovered and hovered states"""
 
     def __init__(self, x, y, width, height, unhover_image, hover_image, command=lambda: None):
@@ -68,7 +68,7 @@ class ImageButton(ButtonGUI):
         high_surface.blit(self.surface, (self.x, self.y))
 
 
-class ImagePreparedButton(ImageButton):
+class ImagePreparedButtonGUI(ImageButtonGUI):
     """ImageButton class with prepared images"""
 
     unhover_image_src = ''
@@ -80,7 +80,7 @@ class ImagePreparedButton(ImageButton):
         super().__init__(x, y, width, height, unhover_image, hover_image, command)
 
 
-class ImageRadioButton(ButtonGUI):
+class ImageRadioButtonGUI(ButtonGUI):
     """Class that describes button, that have images for unhovered, hovered and activated states"""
 
     def __init__(self, x, y, width, height, unhover_image, hover_image, activated_image, command=lambda: None):
@@ -104,7 +104,7 @@ class ImageRadioButton(ButtonGUI):
         high_surface.blit(self.surface, (self.x, self.y))
 
 
-class ImagePreparedRadioButton(ImageRadioButton):
+class ImagePreparedRadioButtonGUI(ImageRadioButtonGUI):
     """ImageRadioButton class with prepared images"""
 
     unhover_image_src = ''
@@ -119,7 +119,7 @@ class ImagePreparedRadioButton(ImageRadioButton):
         super().__init__(x, y, width, height, unhover_image, hover_image, activated_image, command)
 
 
-class QueenPromotionButton(ImagePreparedRadioButton):
+class QueenPromotionButton(ImagePreparedRadioButtonGUI):
     """Button class for queen promotion"""
 
     unhover_image_src = 'Sprites/ButtonSprites/Promotion/QueenPromotion/unhover.png'
@@ -127,7 +127,7 @@ class QueenPromotionButton(ImagePreparedRadioButton):
     activated_image_src = 'Sprites/ButtonSprites/Promotion/QueenPromotion/activated.png'
 
 
-class BishopPromotionButton(ImagePreparedRadioButton):
+class BishopPromotionButton(ImagePreparedRadioButtonGUI):
     """Button class for bishop promotion"""
 
     unhover_image_src = 'Sprites/ButtonSprites/Promotion/BishopPromotion/unhover.png'
@@ -135,7 +135,7 @@ class BishopPromotionButton(ImagePreparedRadioButton):
     activated_image_src = 'Sprites/ButtonSprites/Promotion/BishopPromotion/activated.png'
 
 
-class KnightPromotionButton(ImagePreparedRadioButton):
+class KnightPromotionButton(ImagePreparedRadioButtonGUI):
     """Button class for knight promotion"""
 
     unhover_image_src = 'Sprites/ButtonSprites/Promotion/KnightPromotion/unhover.png'
@@ -143,7 +143,7 @@ class KnightPromotionButton(ImagePreparedRadioButton):
     activated_image_src = 'Sprites/ButtonSprites/Promotion/KnightPromotion/activated.png'
 
 
-class RookPromotionButton(ImagePreparedRadioButton):
+class RookPromotionButton(ImagePreparedRadioButtonGUI):
     """Button class for rook promotion"""
 
     unhover_image_src = 'Sprites/ButtonSprites/Promotion/RookPromotion/unhover.png'
@@ -151,49 +151,49 @@ class RookPromotionButton(ImagePreparedRadioButton):
     activated_image_src = 'Sprites/ButtonSprites/Promotion/RookPromotion/activated.png'
 
 
-class FullBackwardButton(ImagePreparedButton):
+class FullBackwardButton(ImagePreparedButtonGUI):
     """Button class for rewinding chess history (full backward)"""
 
     unhover_image_src = 'Sprites/ButtonSprites/full_backward.png'
 
 
-class FullForwardButton(ImagePreparedButton):
+class FullForwardButton(ImagePreparedButtonGUI):
     """Button class for rewinding chess history (full forward)"""
 
     unhover_image_src = 'Sprites/ButtonSprites/full_forward.png'
 
 
-class SkipBackwardButton(ImagePreparedButton):
+class SkipBackwardButton(ImagePreparedButtonGUI):
     """Button class for rewinding chess history (one step back)"""
 
     unhover_image_src = 'Sprites/ButtonSprites/skip_back.png'
 
 
-class SkipButton(ImagePreparedButton):
+class SkipButton(ImagePreparedButtonGUI):
     """Button class for rewinding chess history (one step forward)"""
 
     unhover_image_src = 'Sprites/ButtonSprites/skip.png'
 
 
-class RestartButton(ImagePreparedButton):
+class RestartButton(ImagePreparedButtonGUI):
     """Button class for restarting the game"""
 
     unhover_image_src = 'Sprites/ButtonSprites/restart.png'
 
 
-class ImportFENButton(ImagePreparedButton):
+class ImportFENButton(ImagePreparedButtonGUI):
     """Button class for restarting game with custom position"""
 
     unhover_image_src = 'Sprites/ButtonSprites/import_fen.png'
 
 
-class RestartInitialPositionButton(ImagePreparedButton):
+class RestartInitialPositionButton(ImagePreparedButtonGUI):
     """Button class for restarting the initial position of game"""
 
     unhover_image_src = 'Sprites/ButtonSprites/full_restart.png'
 
 
-class ExitButton(ImagePreparedButton):
+class ExitButton(ImagePreparedButtonGUI):
     """Button class for exiting"""
 
     unhover_image_src = 'Sprites/ButtonSprites/exit.png'
