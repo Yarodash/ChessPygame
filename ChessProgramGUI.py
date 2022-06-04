@@ -8,8 +8,6 @@ from ChessLogic import *
 from GUIButtons import *
 from SoundEffects import *
 
-import random
-
 
 class ChessSprites:
     chess_pieces_sprite_destination = 'Sprites/chess_pieces_sprite.png'
@@ -65,7 +63,6 @@ class ChessPieceGUI(pygame.Rect):
 
 
 class ChessBoardGUI:
-
     WHITE_CELL_COLOR = (240, 217, 181)
     BLACK_CELL_COLOR = (181, 136, 99)
 
@@ -211,6 +208,7 @@ class ChessProgramGUI:
 
         self.font = pygame.font.SysFont('Courier New', int(self.SQUARE / 4.5))
         self.font_big = pygame.font.SysFont('Courier New', int(self.SQUARE / 2.2))
+        self.font_tooltip = pygame.font.SysFont('Tahoma', int(self.SQUARE / 5))
         self.fen = ''
 
         self.sound_effects = SoundEffects()
@@ -235,10 +233,18 @@ class ChessProgramGUI:
         self.promotion = new_promotion
 
     def create_promotion_buttons(self):
-        queen_promotion_btn = QueenPromotionButton(self.SQUARE * 10, self.SQUARE * 2, self.SQUARE, self.SQUARE)
-        bishop_promotion_btn = BishopPromotionButton(self.SQUARE * 11, self.SQUARE * 2, self.SQUARE, self.SQUARE)
-        knight_promotion_btn = KnightPromotionButton(self.SQUARE * 12, self.SQUARE * 2, self.SQUARE, self.SQUARE)
-        rook_promotion_btn = RookPromotionButton(self.SQUARE * 13, self.SQUARE * 2, self.SQUARE, self.SQUARE)
+        queen_promotion_btn = QueenPromotionButton(self.SQUARE * 10, self.SQUARE * 2, self.SQUARE, self.SQUARE,
+                                                   tooltip="Promote to Queen", tooltip_font=self.font_tooltip,
+                                                   tooltip_position=TooltipPosition.BOTTOM)
+        bishop_promotion_btn = BishopPromotionButton(self.SQUARE * 11, self.SQUARE * 2, self.SQUARE, self.SQUARE,
+                                                     tooltip="Promote to Bishop", tooltip_font=self.font_tooltip,
+                                                     tooltip_position=TooltipPosition.BOTTOM)
+        knight_promotion_btn = KnightPromotionButton(self.SQUARE * 12, self.SQUARE * 2, self.SQUARE, self.SQUARE,
+                                                     tooltip="Promote to Knight", tooltip_font=self.font_tooltip,
+                                                     tooltip_position=TooltipPosition.BOTTOM)
+        rook_promotion_btn = RookPromotionButton(self.SQUARE * 13, self.SQUARE * 2, self.SQUARE, self.SQUARE,
+                                                 tooltip="Promote to Rook", tooltip_font=self.font_tooltip,
+                                                 tooltip_position=TooltipPosition.BOTTOM)
         queen_promotion_btn.activate()
 
         queen_promotion_btn.set_command(lambda: (queen_promotion_btn.activate(),
@@ -273,18 +279,25 @@ class ChessProgramGUI:
     def create_history_buttons(self):
         full_backward_button = FullBackwardButton(self.SQUARE * 10, self.SQUARE * 5, self.SQUARE, self.SQUARE,
                                                   lambda: (self.chess_game.rewind(), self.update(),
-                                                           self.sound_effects.move_sound.play()))
+                                                           self.sound_effects.move_sound.play()),
+                                                  tooltip="Move to history start", tooltip_font=self.font_tooltip,
+                                                  tooltip_position=TooltipPosition.TOP)
 
         skip_backward_button = SkipBackwardButton(self.SQUARE * 11, self.SQUARE * 5, self.SQUARE, self.SQUARE,
                                                   lambda: (self.chess_game.skip_backward(), self.update(),
-                                                           self.sound_effects.move_sound.play()))
+                                                           self.sound_effects.move_sound.play()),
+                                                  tooltip="Previous turn", tooltip_font=self.font_tooltip,
+                                                  tooltip_position=TooltipPosition.TOP)
 
         skip_button = SkipButton(self.SQUARE * 12, self.SQUARE * 5, self.SQUARE, self.SQUARE,
-                                 lambda: (self.chess_game.skip(), self.update(), self.sound_effects.move_sound.play()))
+                                 lambda: (self.chess_game.skip(), self.update(), self.sound_effects.move_sound.play()),
+                                 tooltip="Next turn", tooltip_font=self.font_tooltip,
+                                 tooltip_position=TooltipPosition.TOP)
 
         full_forward_button = FullForwardButton(self.SQUARE * 13, self.SQUARE * 5, self.SQUARE, self.SQUARE,
                                                 lambda: (self.chess_game.fast_forward(), self.update(),
-                                                         self.sound_effects.move_sound.play()))
+                                                         self.sound_effects.move_sound.play()), tooltip="Current turn",
+                                                tooltip_font=self.font_tooltip, tooltip_position=TooltipPosition.TOP)
 
         self.buttons.append(full_backward_button)
         self.buttons.append(skip_backward_button)
@@ -293,7 +306,11 @@ class ChessProgramGUI:
 
     def create_special_buttons(self):
         restart_button = RestartButton(self.SQUARE * 10, self.SQUARE * 6, self.SQUARE, self.SQUARE,
-                                       lambda: (self.chess_game.restart(), self.update(), self.sound_effects.move_sound.play()))
+                                       lambda: (
+                                           self.chess_game.restart(), self.update(),
+                                           self.sound_effects.move_sound.play()),
+                                       tooltip="Restart game", tooltip_font=self.font_tooltip,
+                                       tooltip_position=TooltipPosition.BOTTOM)
         self.buttons.append(restart_button)
 
         def import_fen_button_impl():
@@ -315,27 +332,36 @@ class ChessProgramGUI:
                 root.destroy()
 
         import_fen_button = ImportFENButton(self.SQUARE * 11, self.SQUARE * 6, self.SQUARE, self.SQUARE,
-                                            import_fen_button_impl)
+                                            import_fen_button_impl, tooltip="Import FEN",
+                                            tooltip_font=self.font_tooltip, tooltip_position=TooltipPosition.BOTTOM)
         self.buttons.append(import_fen_button)
 
         restart_initial_position_button = RestartInitialPositionButton(self.SQUARE * 12, self.SQUARE * 6,
                                                                        self.SQUARE, self.SQUARE,
                                                                        lambda: (
                                                                            self.chess_game.restart_game_with_starting_position(),
-                                                                           self.update(), self.sound_effects.move_sound.play()))
+                                                                           self.update(),
+                                                                           self.sound_effects.move_sound.play()),
+                                                                       tooltip="Set to initial position",
+                                                                       tooltip_font=self.font_tooltip,
+                                                                       tooltip_position=TooltipPosition.BOTTOM)
         self.buttons.append(restart_initial_position_button)
 
         def copy_fen_to_clipboard():
             fen = self.chess_game.current_chess_position.generate_fen()
             pyperclip.copy(fen)
 
-        self.fen_copy_button = FENCopyButtonGUI(self.SQUARE * 0.6, self.SQUARE * 8.7, self.font, copy_fen_to_clipboard)
+        self.fen_copy_button = FENCopyButtonGUI(self.SQUARE * 0.6, self.SQUARE * 8.7, self.font, copy_fen_to_clipboard,
+                                                tooltip="Tap to copy", tooltip_font=self.font_tooltip,
+                                                tooltip_position=TooltipPosition.BOTTOM)
         self.buttons.append(self.fen_copy_button)
 
         def exit_button_impl():
             raise self.QuitException
 
-        exit_button = ExitButton(self.SQUARE * 13, self.SQUARE * 6, self.SQUARE, self.SQUARE, exit_button_impl)
+        exit_button = ExitButton(self.SQUARE * 13, self.SQUARE * 6, self.SQUARE, self.SQUARE, exit_button_impl,
+                                 tooltip="Exit", tooltip_font=self.font_tooltip,
+                                 tooltip_position=TooltipPosition.BOTTOM)
         self.buttons.append(exit_button)
 
     def handle_mouse_event(self, event):
