@@ -1,12 +1,29 @@
 import pygame
+import enum
+
+
+class TooltipPosition(enum.Enum):
+    TOP = 0
+    BOTTOM = 1
+
+    @staticmethod
+    def get_default():
+        return TooltipPosition.TOP
+
+    def __str__(self):
+        return self.name
 
 
 class ButtonGUI(pygame.Rect):
+    _tooltip_size_coefficient = 1.1
     """Class that describes button"""
 
-    def __init__(self, x, y, width, height, command=lambda: None):
+    def __init__(self, x, y, width, height, command=lambda: None, **kwargs):
         super().__init__(x, y, width, height)
         self.command = command
+        self.tooltip = kwargs.get("tooltip", "")
+        self.tooltip_font = kwargs.get("tooltip_font", None)
+        self.tooltip_position = kwargs.get("tooltip_position", TooltipPosition.get_default())
         self.is_hovered = False
         self.activated = False
 
@@ -31,8 +48,32 @@ class ButtonGUI(pygame.Rect):
     def deactivate(self):
         self.activated = False
 
-    def draw(self, high_surface):
+    def _draw(self, high_surface):
         pass
+
+    def draw_tooltip(self, high_surface):
+        if (not self.is_hovered) or (self.tooltip_font is None) or (not self.tooltip):
+            return
+
+        text_surface = self.tooltip_font.render(self.tooltip, True, (200, 200, 200))
+
+        background_width = int(self._tooltip_size_coefficient * text_surface.get_width())
+        background_height = int(self._tooltip_size_coefficient * text_surface.get_height())
+
+        text_background_surface = pygame.Surface((background_width, background_height), pygame.SRCALPHA)
+        text_background_surface.fill((50, 50, 50))
+
+        if self.tooltip_position == TooltipPosition.BOTTOM:
+            place = text_background_surface.get_rect(midtop=self.midbottom)
+        else:
+            place = text_background_surface.get_rect(midbottom=self.midtop)
+
+        high_surface.blit(text_background_surface, place)
+        high_surface.blit(text_surface, text_surface.get_rect(center=place.center))
+
+    def draw(self, high_surface):
+        self._draw(high_surface)
+        self.draw_tooltip(high_surface)
 
 
 def make_hover_image(unhover_image, scale_factor=1.08):
@@ -51,15 +92,15 @@ def make_hover_image(unhover_image, scale_factor=1.08):
 class ImageButtonGUI(ButtonGUI):
     """Class that describes button, that have images for unhovered and hovered states"""
 
-    def __init__(self, x, y, width, height, unhover_image, hover_image, command=lambda: None):
-        super().__init__(x, y, width, height, command)
+    def __init__(self, x, y, width, height, unhover_image, hover_image, command=lambda: None, **kwargs):
+        super().__init__(x, y, width, height, command, **kwargs)
 
         self.unhover_image = pygame.transform.smoothscale(unhover_image, (width, height))
         self.hover_image = pygame.transform.smoothscale(hover_image, (width, height))
 
         self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
 
-    def draw(self, high_surface):
+    def _draw(self, high_surface):
         self.surface.fill((0, 0, 0, 0))
 
         image_to_draw = self.hover_image if self.is_hovered else self.unhover_image
@@ -73,18 +114,19 @@ class ImagePreparedButtonGUI(ImageButtonGUI):
 
     unhover_image_src = ''
 
-    def __init__(self, x, y, width, height, command=lambda: None):
+    def __init__(self, x, y, width, height, command=lambda: None, **kwargs):
         unhover_image = pygame.image.load(self.unhover_image_src).convert_alpha()
         hover_image = make_hover_image(unhover_image)
 
-        super().__init__(x, y, width, height, unhover_image, hover_image, command)
+        super().__init__(x, y, width, height, unhover_image, hover_image, command, **kwargs)
 
 
 class ImageRadioButtonGUI(ButtonGUI):
     """Class that describes button, that have images for unhovered, hovered and activated states"""
 
-    def __init__(self, x, y, width, height, unhover_image, hover_image, activated_image, command=lambda: None):
-        super().__init__(x, y, width, height, command)
+    def __init__(self, x, y, width, height, unhover_image, hover_image, activated_image, command=lambda: None,
+                 **kwargs):
+        super().__init__(x, y, width, height, command, **kwargs)
 
         self.unhover_image = pygame.transform.smoothscale(unhover_image, (width, height))
         self.hover_image = pygame.transform.smoothscale(hover_image, (width, height))
@@ -92,7 +134,7 @@ class ImageRadioButtonGUI(ButtonGUI):
 
         self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
 
-    def draw(self, high_surface):
+    def _draw(self, high_surface):
         self.surface.fill((0, 0, 0, 0))
 
         if self.activated:
@@ -111,12 +153,12 @@ class ImagePreparedRadioButtonGUI(ImageRadioButtonGUI):
     hover_image_src = ''
     activated_image_src = ''
 
-    def __init__(self, x, y, width, height, command=lambda: None):
+    def __init__(self, x, y, width, height, command=lambda: None, **kwargs):
         unhover_image = pygame.image.load(self.unhover_image_src).convert_alpha()
         hover_image = pygame.image.load(self.hover_image_src).convert_alpha()
         activated_image = pygame.image.load(self.activated_image_src).convert_alpha()
 
-        super().__init__(x, y, width, height, unhover_image, hover_image, activated_image, command)
+        super().__init__(x, y, width, height, unhover_image, hover_image, activated_image, command, **kwargs)
 
 
 class QueenPromotionButton(ImagePreparedRadioButtonGUI):
@@ -202,8 +244,8 @@ class ExitButton(ImagePreparedButtonGUI):
 class FENCopyButtonGUI(ButtonGUI):
     """Button class for restarting the game"""
 
-    def __init__(self, x, y, font, command=lambda: None):
-        super().__init__(x, y, 1, 1, command)
+    def __init__(self, x, y, font, command=lambda: None, **kwargs):
+        super().__init__(x, y, 1, 1, command, **kwargs)
 
         self.font = font
         self.fen = ''
@@ -211,7 +253,7 @@ class FENCopyButtonGUI(ButtonGUI):
     def set_fen(self, fen):
         self.fen = fen
 
-    def draw(self, high_surface):
+    def _draw(self, high_surface):
         text_surface = self.font.render('FEN: ' + self.fen, True, (0, 0, 0))
 
         self.width, self.height = text_surface.get_size()
@@ -235,4 +277,5 @@ __all__ = ['QueenPromotionButton',
            'ImportFENButton',
            'RestartInitialPositionButton',
            'ExitButton',
-           'FENCopyButtonGUI']
+           'FENCopyButtonGUI',
+           'TooltipPosition']
