@@ -1,5 +1,6 @@
 import pygame
 import enum
+import time
 
 
 class TooltipPosition(enum.Enum):
@@ -16,6 +17,7 @@ class TooltipPosition(enum.Enum):
 
 class ButtonGUI(pygame.Rect):
     _tooltip_size_coefficient = 1.1
+    _full_hover_time = 0.35
     """Class that describes button"""
 
     def __init__(self, x, y, width, height, command=lambda: None, **kwargs):
@@ -24,6 +26,7 @@ class ButtonGUI(pygame.Rect):
         self.tooltip = kwargs.get("tooltip", "")
         self.tooltip_font = kwargs.get("tooltip_font", None)
         self.tooltip_position = kwargs.get("tooltip_position", TooltipPosition.get_default())
+        self.hover_time = 0
         self.is_hovered = False
         self.activated = False
 
@@ -37,6 +40,8 @@ class ButtonGUI(pygame.Rect):
         self.command()
 
     def hover(self):
+        if not self.is_hovered:
+            self.hover_time = time.time()
         self.is_hovered = True
 
     def unhover(self):
@@ -55,6 +60,8 @@ class ButtonGUI(pygame.Rect):
         if (not self.is_hovered) or (self.tooltip_font is None) or (not self.tooltip):
             return
 
+        percent = min(1.0, (time.time() - self.hover_time) / self._full_hover_time)
+
         text_surface = self.tooltip_font.render(self.tooltip, True, (200, 200, 200))
 
         background_width = int(self._tooltip_size_coefficient * text_surface.get_width())
@@ -62,14 +69,15 @@ class ButtonGUI(pygame.Rect):
 
         text_background_surface = pygame.Surface((background_width, background_height), pygame.SRCALPHA)
         text_background_surface.fill((50, 50, 50))
+        text_background_surface.blit(text_surface, text_surface.get_rect(center=text_background_surface.get_rect().center))
 
         if self.tooltip_position == TooltipPosition.BOTTOM:
             place = text_background_surface.get_rect(midtop=self.midbottom)
         else:
             place = text_background_surface.get_rect(midbottom=self.midtop)
 
+        text_background_surface.set_alpha(int(percent * 255))
         high_surface.blit(text_background_surface, place)
-        high_surface.blit(text_surface, text_surface.get_rect(center=place.center))
 
     def draw(self, high_surface):
         self._draw(high_surface)
