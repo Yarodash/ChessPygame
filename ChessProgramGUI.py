@@ -208,7 +208,7 @@ class ChessProgramGUI:
 
         self.font = pygame.font.SysFont('Courier New', int(self.SQUARE / 4.5))
         self.font_big = pygame.font.SysFont('Courier New', int(self.SQUARE / 2.2))
-        self.font_tooltip = pygame.font.SysFont('Tahoma', int(self.SQUARE / 5))
+        self.font_tooltip = pygame.font.SysFont('Tahoma', int(self.SQUARE / 4.8))
         self.fen = ''
 
         self.sound_effects = SoundEffects()

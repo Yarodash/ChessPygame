@@ -16,9 +16,10 @@ class TooltipPosition(enum.Enum):
 
 
 class ButtonGUI(pygame.Rect):
-    _tooltip_size_coefficient = 1.1
-    _full_hover_time = 0.35
     """Class that describes button"""
+    _tooltip_size_coefficient = 1.3
+    _tooltip_width_coefficient = 2
+    _full_hover_time = 0.35
 
     def __init__(self, x, y, width, height, command=lambda: None, **kwargs):
         super().__init__(x, y, width, height)
@@ -56,19 +57,22 @@ class ButtonGUI(pygame.Rect):
     def _draw(self, high_surface):
         pass
 
+    @property
+    def hover_percent(self):
+        return min(1.0, (time.time() - self.hover_time) / self._full_hover_time)
+
     def draw_tooltip(self, high_surface):
         if (not self.is_hovered) or (self.tooltip_font is None) or (not self.tooltip):
             return
 
-        percent = min(1.0, (time.time() - self.hover_time) / self._full_hover_time)
-
         text_surface = self.tooltip_font.render(self.tooltip, True, (200, 200, 200))
 
-        background_width = int(self._tooltip_size_coefficient * text_surface.get_width())
-        background_height = int(self._tooltip_size_coefficient * text_surface.get_height())
+        added_size = (self._tooltip_size_coefficient - 1) * text_surface.get_height()
+        background_width = text_surface.get_width() + self._tooltip_width_coefficient * added_size
+        background_height = text_surface.get_height() + added_size
 
         text_background_surface = pygame.Surface((background_width, background_height), pygame.SRCALPHA)
-        text_background_surface.fill((50, 50, 50))
+        pygame.draw.rect(text_background_surface, (50, 50, 50), text_background_surface.get_rect(), border_radius=7)
         text_background_surface.blit(text_surface, text_surface.get_rect(center=text_background_surface.get_rect().center))
 
         if self.tooltip_position == TooltipPosition.BOTTOM:
@@ -76,7 +80,7 @@ class ButtonGUI(pygame.Rect):
         else:
             place = text_background_surface.get_rect(midbottom=self.midtop)
 
-        text_background_surface.set_alpha(int(percent * 255))
+        text_background_surface.set_alpha(int(self.hover_percent * 255))
         high_surface.blit(text_background_surface, place)
 
     def draw(self, high_surface):
@@ -84,9 +88,9 @@ class ButtonGUI(pygame.Rect):
         self.draw_tooltip(high_surface)
 
 
-def make_hover_image(unhover_image, scale_factor=1.08):
+def make_hover_image(unhover_image, scale_factor=1.08, blackness=45):
     hover_image = pygame.Surface(unhover_image.get_size(), pygame.SRCALPHA).convert_alpha()
-    hover_image.fill((0, 0, 0, 45))
+    hover_image.fill((0, 0, 0, blackness))
 
     w, h = hover_image.get_size()
     shift_factor = (scale_factor - 1) / 2
@@ -111,7 +115,10 @@ class ImageButtonGUI(ButtonGUI):
     def _draw(self, high_surface):
         self.surface.fill((0, 0, 0, 0))
 
-        image_to_draw = self.hover_image if self.is_hovered else self.unhover_image
+        if self.is_hovered:
+            image_to_draw = make_hover_image(self.unhover_image, 1, int(45 * self.hover_percent ** 0.4))
+        else:
+            image_to_draw = self.unhover_image
 
         self.surface.blit(image_to_draw, (0, 0))
         high_surface.blit(self.surface, (self.x, self.y))
